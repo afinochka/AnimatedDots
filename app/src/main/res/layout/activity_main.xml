@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             app:color_array="@array/dot_colors"
             app:dot_radius="20dp"
-            app:number_of_dots="1"/>
+            app:number_of_dots="7"/>
     </LinearLayout>
 
     <Button

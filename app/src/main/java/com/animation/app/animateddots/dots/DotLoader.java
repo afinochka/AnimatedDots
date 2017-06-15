@@ -21,9 +21,9 @@ import java.lang.ref.WeakReference;
  */
 
 public class DotLoader extends View {
-    private static final int DELAY_BETWEEN_DOTS = 200; //80
+    private static final int DELAY_BETWEEN_DOTS = 500; //80
     private static final int BOUNCE_ANIMATION_DURATION = 500; //500
-    private static final int COLOR_ANIMATION_DURATION = 80; //80
+    private static final int COLOR_ANIMATION_DURATION = 500; //80
     private Dot[] mDots;
     Integer[] mColors;
     private int mDotRadius;
@@ -47,20 +47,20 @@ public class DotLoader extends View {
                 newDots[i].setColorIndex(newDots[i - 1].mCurrentColorIndex);
                 newDots[i].positionAnimator =
                         clonePositionAnimatorForDot(newDots[0].positionAnimator, newDots[i]);
-                newDots[i].colorAnimator =
-                        cloneColorAnimatorForDot(newDots[0].colorAnimator, newDots[i]);
+               /* newDots[i].colorAnimator =
+                        cloneColorAnimatorForDot(newDots[0].colorAnimator, newDots[i]);*/
                 newDots[i].positionAnimator.start();
             }
         }
         mDots = newDots;
     }
 
-    private ValueAnimator cloneColorAnimatorForDot(ValueAnimator colorAnimator, Dot dot) {
+    /*private ValueAnimator cloneColorAnimatorForDot(ValueAnimator colorAnimator, Dot dot) {
         ValueAnimator valueAnimator = colorAnimator.clone();
         valueAnimator.removeAllUpdateListeners();
         valueAnimator.addUpdateListener(new DotColorUpdater(dot, this));
         return valueAnimator;
-    }
+    }*/
 
     private ValueAnimator clonePositionAnimatorForDot(ValueAnimator animator, final Dot dot) {
         ValueAnimator valueAnimator = animator.clone();
@@ -68,7 +68,7 @@ public class DotLoader extends View {
         valueAnimator.addUpdateListener(new DotYUpdater(dot, this));
         valueAnimator.setStartDelay(DELAY_BETWEEN_DOTS * dot.position);
         valueAnimator.removeAllListeners();
-        valueAnimator.addListener(new AnimationRepeater(dot, mColors));
+      /*  valueAnimator.addListener(new AnimationRepeater(dot, mColors));*/
         return valueAnimator;
     }
 
@@ -151,7 +151,7 @@ public class DotLoader extends View {
             mDots[i].positionAnimator = createValueAnimatorForDot(mDots[i]);
             mDots[i].positionAnimator.setStartDelay(DELAY_BETWEEN_DOTS * i);
 
-            mDots[i].colorAnimator = createColorAnimatorForDot(mDots[i]);
+            /*mDots[i].colorAnimator = createColorAnimatorForDot(mDots[i]);*/
         }
     }
 
@@ -202,20 +202,20 @@ public class DotLoader extends View {
         animator.setRepeatCount(ValueAnimator.INFINITE);
         animator.setRepeatMode(ValueAnimator.REVERSE);
         animator.addUpdateListener(new DotYUpdater(dot, this));
-        animator.addListener(new AnimationRepeater(dot, mColors));
+       /* animator.addListener(new AnimationRepeater(dot, mColors));*/
         return animator;
     }
 
-    private ValueAnimator createColorAnimatorForDot(Dot dot) {
+    /*private ValueAnimator createColorAnimatorForDot(Dot dot) {
         ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mColors[dot.mCurrentColorIndex],
                 mColors[dot.incrementColorIndex()]);
         animator.setInterpolator(new LinearInterpolator());
         animator.setDuration(COLOR_ANIMATION_DURATION);
         animator.addUpdateListener(new DotColorUpdater(dot, this));
         return animator;
-    }
+    }*/
 
-    private static class DotColorUpdater implements ValueAnimator.AnimatorUpdateListener {
+    /*private static class DotColorUpdater implements ValueAnimator.AnimatorUpdateListener {
         private Dot mDot;
         private WeakReference<DotLoader> mDotLoaderRef;
 
@@ -232,7 +232,7 @@ public class DotLoader extends View {
                 dotLoader.invalidateOnlyRectIfPossible();
             }
         }
-    }
+    }*/
 
     private static class DotYUpdater implements ValueAnimator.AnimatorUpdateListener {
         private Dot mDot;

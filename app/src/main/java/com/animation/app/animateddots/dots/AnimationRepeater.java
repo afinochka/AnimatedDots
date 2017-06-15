@@ -33,7 +33,7 @@ class AnimationRepeater implements Animator.AnimatorListener {
 
     @Override
     public void onAnimationRepeat(Animator animator) {
-        if (alternate) {
+        /*if (alternate) {
             mDot.colorAnimator.setObjectValues(
                     mColors[mDot.mCurrentColorIndex],
                     mColors[mDot.incrementColorIndex()]
@@ -42,6 +42,6 @@ class AnimationRepeater implements Animator.AnimatorListener {
             alternate = false;
         } else {
             alternate = true;
-        }
+        }*/
     }
 }
