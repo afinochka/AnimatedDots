@@ -1,29 +1,33 @@
 package com.animation.app.animateddots.dots;
 
 import android.animation.Animator;
+import android.animation.ValueAnimator;
 
 /**
  * Created by Dasha on 15.06.2017
  */
 
 class AnimationRepeater implements Animator.AnimatorListener {
-    private boolean alternate = true;
-    private Dot mDot;
-    private Integer[] mColors;
+    private AnimatedDot mDot;
+    private int mDelay = 1000;
 
-    AnimationRepeater(Dot dot, Integer[] colors) {
+    AnimationRepeater(AnimatedDot dot, int delay) {
         this.mDot = dot;
-        mColors = colors;
+        mDelay = delay;
     }
 
     @Override
     public void onAnimationStart(Animator animator) {
-
+        mDot.incrementColorIndex();
+        mDot.setColor(mDot.getCurrentColor());
+        mDot.incrementColorIndex();
     }
 
     @Override
     public void onAnimationEnd(Animator animator) {
-
+        mDot.setColor(mDot.getCurrentColor());
+        animator.setStartDelay(mDelay);
+        animator.start();
     }
 
     @Override
@@ -33,15 +37,5 @@ class AnimationRepeater implements Animator.AnimatorListener {
 
     @Override
     public void onAnimationRepeat(Animator animator) {
-        /*if (alternate) {
-            mDot.colorAnimator.setObjectValues(
-                    mColors[mDot.mCurrentColorIndex],
-                    mColors[mDot.incrementColorIndex()]
-            );
-            mDot.colorAnimator.start();
-            alternate = false;
-        } else {
-            alternate = true;
-        }*/
     }
 }

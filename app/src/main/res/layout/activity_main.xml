@@ -4,64 +4,33 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingTop="50dp"
                 tools:context=".MainActivity">
 
-    <LinearLayout
+
+    <com.animation.app.animateddots.dots.DotLoader
+        android:id="@+id/dot_loader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:orientation="horizontal">
-
-           <!-- <TextView
-                style="@style/TextAppearance.AppCompat.Display1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="2dp"
-                android:text="Loading"
-                android:textColor="#E65100"
-                android:textSize="44sp"/>
-
-            <com.animation.app.animateddots.dots.DotLoader
-                android:id="@+id/text_dot_loader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                app:color_array="@array/dot_colors"
-                app:dot_radius="4dp"
-                app:number_of_dots="1"/>-->
-        </LinearLayout>
-
-        <!--<FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <com.animation.app.animateddots.dots.DotLoader
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:color_array="@array/dot_colors"
-                app:dot_radius="9dp"
-                app:number_of_dots="1"/>
-        </FrameLayout>-->
-
-        <com.animation.app.animateddots.dots.DotLoader
-            android:id="@+id/dot_loader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:color_array="@array/dot_colors"
-            app:dot_radius="20dp"
-            app:number_of_dots="7"/>
-    </LinearLayout>
+        app:color_active="@color/active"
+        app:color_array_def="@array/dot_colors"
+        app:dot_def_radius="10dp"
+        app:dot_active_radius="15dp"
+        app:number_of_dots="5"/>
 
     <Button
-        android:id="@+id/btn"
-        android:layout_width="match_parent"
+        android:id="@+id/btn_repeat"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Relaunch"/>
+        android:layout_below="@id/dot_loader"
+        android:text="repeat"/>
+
+    <Button
+        android:id="@+id/btn_move"
+        android:layout_below="@+id/dot_loader"
+        android:layout_toEndOf="@id/btn_repeat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="move to next"/>
 
 </RelativeLayout>

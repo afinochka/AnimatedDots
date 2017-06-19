@@ -1,5 +1,7 @@
 package com.animation.app.animateddots.dots;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
@@ -7,76 +9,55 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
 import com.animation.app.animateddots.R;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Dasha on 15.06.2017
  */
 
-public class DotLoader extends View {
+public class DotLoader extends View  {
     private static final int DELAY_BETWEEN_DOTS = 500; //80
+    private static final int APPEAR_DELAY_BETWEEN_DOTS = 200; //80
     private static final int BOUNCE_ANIMATION_DURATION = 500; //500
-    private static final int COLOR_ANIMATION_DURATION = 500; //80
-    private Dot[] mDots;
-    Integer[] mColors;
-    private int mDotRadius;
+    private static final int COLOR_ANIMATION_DURATION = 250; //80
+
+    private IDot[] mDots;
+    private int dotsCount = 0;
+
+    Integer[] mDefColors;
+    float mDefRadius;
+
+    int mActiveColor;
+    int mActivePosDot = -1;
+    float mActiveRadius;
+
     private Rect mClipBounds;
     private float mCalculatedGapBetweenDotCenters;
     private float mFromY;
     private float mToY;
+
+    AnimatorSet mAppearAnimatorSet;
+    AnimatorSet mLoadingAnimationSet;
+    AnimatorSet mGlobalSet;
+
+    List<Animator> appearAnim = new ArrayList<>();
+    List<Animator> loadingAnim = new ArrayList<>();
+
     private Interpolator bounceAnimationInterpolator =
             new CubicBezierInterpolator(0.62f, 0.28f, 0.23f, 0.99f); //0.62f, 0.28f, 0.23f, 0.99f
 
-    public void setNumberOfDots(int numberOfDots) {
-        Dot[] newDots = new Dot[numberOfDots];
-        if (numberOfDots < mDots.length) {
-            System.arraycopy(mDots, 0, newDots, 0, numberOfDots);
-        } else {
-            System.arraycopy(mDots, 0, newDots, 0, mDots.length);
-            for (int i = mDots.length; i < numberOfDots; i++) {
-                newDots[i] = new Dot(this, mDotRadius, i);
-                newDots[i].cx = newDots[i - 1].cx + mCalculatedGapBetweenDotCenters;
-                newDots[i].cy = newDots[i - 1].cy / 2;
-                newDots[i].setColorIndex(newDots[i - 1].mCurrentColorIndex);
-                newDots[i].positionAnimator =
-                        clonePositionAnimatorForDot(newDots[0].positionAnimator, newDots[i]);
-               /* newDots[i].colorAnimator =
-                        cloneColorAnimatorForDot(newDots[0].colorAnimator, newDots[i]);*/
-                newDots[i].positionAnimator.start();
-            }
-        }
-        mDots = newDots;
-    }
-
-    /*private ValueAnimator cloneColorAnimatorForDot(ValueAnimator colorAnimator, Dot dot) {
-        ValueAnimator valueAnimator = colorAnimator.clone();
-        valueAnimator.removeAllUpdateListeners();
-        valueAnimator.addUpdateListener(new DotColorUpdater(dot, this));
-        return valueAnimator;
-    }*/
-
-    private ValueAnimator clonePositionAnimatorForDot(ValueAnimator animator, final Dot dot) {
-        ValueAnimator valueAnimator = animator.clone();
-        valueAnimator.removeAllUpdateListeners();
-        valueAnimator.addUpdateListener(new DotYUpdater(dot, this));
-        valueAnimator.setStartDelay(DELAY_BETWEEN_DOTS * dot.position);
-        valueAnimator.removeAllListeners();
-      /*  valueAnimator.addListener(new AnimationRepeater(dot, mColors));*/
-        return valueAnimator;
-    }
-
-    public void resetColors() {
-        for (Dot dot : mDots) {
-            dot.setColorIndex(0);
-        }
-    }
 
     public DotLoader(Context context) {
         super(context);
@@ -105,54 +86,92 @@ public class DotLoader extends View {
         }
         TypedArray a = c.getTheme().obtainStyledAttributes(attrs, R.styleable.DotLoader, 0, 0);
         try {
-            float dotRadius = a.getDimension(R.styleable.DotLoader_dot_radius, 0);
-            int numberOfPods = a.getInteger(R.styleable.DotLoader_number_of_dots, 1);
-            int resId = a.getResourceId(R.styleable.DotLoader_color_array, 0);
-            Integer[] colors;
-            if (resId == 0) {
-                colors = new Integer[numberOfPods];
-                for (int i = 0; i < numberOfPods; i++) {
-                    colors[i] = 0x0;
+            mDefRadius = a.getDimension(R.styleable.DotLoader_dot_def_radius, 0);
+            mActiveRadius = a.getDimension(R.styleable.DotLoader_dot_active_radius, 0);
+            dotsCount = a.getInteger(R.styleable.DotLoader_number_of_dots, 1);
+            int colorArrayId = a.getResourceId(R.styleable.DotLoader_color_array_def, 0);
+            int colorActiveId = a.getResourceId(R.styleable.DotLoader_color_active, 0);
+            if(colorActiveId != 0){
+                mActiveColor = ContextCompat.getColor(getContext(), colorActiveId);
+                mActivePosDot = 0;
+            }
+
+            if (colorArrayId == 0) {
+                mDefColors = new Integer[dotsCount];
+                for (int i = 1; i < dotsCount; i++) {
+                    mDefColors[i] = 0x0;
                 }
             } else {
-                int[] temp = getResources().getIntArray(resId);
-                colors = new Integer[temp.length];
+                int[] temp = getResources().getIntArray(colorArrayId);
+                mDefColors = new Integer[temp.length];
                 for (int i = 0; i < temp.length; i++) {
-                    colors[i] = temp[i];
+                    mDefColors[i] = temp[i];
                 }
             }
-            init(numberOfPods, colors, (int) dotRadius);
+
+            init(mActivePosDot);
         } finally {
             a.recycle();
         }
     }
 
     private void _stopAnimations() {
-        for (Dot dot : mDots) {
-            dot.positionAnimator.end();
-            dot.colorAnimator.end();
-        }
+        mAppearAnimatorSet.cancel();
+        mLoadingAnimationSet.cancel();
+        mGlobalSet.cancel();
     }
 
-    private void init(int numberOfDots, Integer[] colors, int dotRadius) {
-        mColors = colors;
+    private void init(int activePos) {
         mClipBounds = new Rect(0, 0, 0, 0);
-        mDots = new Dot[numberOfDots];
-        mDotRadius = dotRadius;
-        for (int i = 0; i < numberOfDots; i++) {
-            mDots[i] = new Dot(this, dotRadius, i);
+        mDots = new IDot[dotsCount];
+
+        for (int i = 0; i < dotsCount; i++) {
+            if(activePos != -1 && i == mActivePosDot) {
+                mDots[i] = IDot.getDot(IDot.DotType.STATIC);
+                mDots[i].initDot(mActiveRadius, i, mActiveColor);
+            }else {
+                mDots[i] = IDot.getDot(IDot.DotType.ANIMATED);
+                ((AnimatedDot) mDots[i]).setColors(mDefColors);
+                mDots[i].initDot(0, i, mDefColors[0]);
+            }
         }
+
         //noinspection deprecation
         startAnimation();
     }
 
     public void initAnimation() {
         for (int i = 0, size = mDots.length; i < size; i++) {
-            mDots[i].positionAnimator = createValueAnimatorForDot(mDots[i]);
-            mDots[i].positionAnimator.setStartDelay(DELAY_BETWEEN_DOTS * i);
+            if(i != mActivePosDot) {
 
-            /*mDots[i].colorAnimator = createColorAnimatorForDot(mDots[i]);*/
+                ((AnimatedDot) mDots[i]).setLoaderAnimator(createLoaderAnimatorForDot((AnimatedDot) mDots[i]), DELAY_BETWEEN_DOTS * i);
+                loadingAnim.add(((AnimatedDot) mDots[i]).getLoaderAnimator());
+
+             /*   ((AnimatedDot) mDots[i]).setColorAnimator(createColorAnimatorForDot((AnimatedDot) mDots[i]));*/
+
+                ((AnimatedDot) mDots[i]).setAppearAnimator(createAppearAnimatorForDot((AnimatedDot) mDots[i]), APPEAR_DELAY_BETWEEN_DOTS);
+                appearAnim.add(((AnimatedDot) mDots[i]).getAppearAnimator());
+            }
         }
+    }
+
+    private ValueAnimator createLoaderAnimatorForDot(final AnimatedDot dot) {
+        final ValueAnimator animator = ValueAnimator.ofFloat(mFromY, mToY);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        animator.setDuration(BOUNCE_ANIMATION_DURATION);
+        animator.setRepeatCount(1);
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.addUpdateListener(new DotYUpdater(dot, this));
+        animator.addListener(new AnimationRepeater(dot, (mDots.length - 1) * DELAY_BETWEEN_DOTS));
+        return animator;
+    }
+
+    private ValueAnimator createAppearAnimatorForDot(final AnimatedDot dot) {
+        final ValueAnimator animator = ValueAnimator.ofFloat(0, mDefRadius);
+        animator.setInterpolator(new AccelerateInterpolator());
+        animator.setDuration(300);
+        animator.addUpdateListener(new DotRUpdater(dot, this));
+        return animator;
     }
 
     /**
@@ -165,9 +184,12 @@ public class DotLoader extends View {
         postDelayed(new Runnable() {
             @Override
             public void run() {
+                /*resetColors();*/
                 _startAnimation();
             }
         }, 10);
+
+
     }
 
     /**
@@ -188,38 +210,39 @@ public class DotLoader extends View {
 
     private void _startAnimation() {
         initAnimation();
-        for (Dot mDot : mDots) {
-            mDot.positionAnimator.start();
-        }
+
+        mGlobalSet = new AnimatorSet();
+        mAppearAnimatorSet = new AnimatorSet();
+        mAppearAnimatorSet.playSequentially(appearAnim);
+        mLoadingAnimationSet = new AnimatorSet();
+        mLoadingAnimationSet.playTogether(loadingAnim);
+        mGlobalSet.playSequentially(mAppearAnimatorSet, mLoadingAnimationSet);
+        mGlobalSet.start();
     }
 
-    private ValueAnimator createValueAnimatorForDot(final Dot dot) {
-        ValueAnimator animator = ValueAnimator.ofFloat(
-                mFromY, mToY
-        );
-        animator.setInterpolator(bounceAnimationInterpolator);
-        animator.setDuration(BOUNCE_ANIMATION_DURATION);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.setRepeatMode(ValueAnimator.REVERSE);
-        animator.addUpdateListener(new DotYUpdater(dot, this));
-       /* animator.addListener(new AnimationRepeater(dot, mColors));*/
-        return animator;
+    public void repeatAnimation(){
+        //noinspection deprecation
+        stopAnimations();
+
+        //noinspection deprecation
+        init(mActivePosDot);
     }
 
-    /*private ValueAnimator createColorAnimatorForDot(Dot dot) {
-        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mColors[dot.mCurrentColorIndex],
-                mColors[dot.incrementColorIndex()]);
+    private ValueAnimator createColorAnimatorForDot(AnimatedDot dot) {
+        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefColors[dot.getCurrentColorIndex()],
+                mDefColors[dot.incrementColorIndex()]);
         animator.setInterpolator(new LinearInterpolator());
         animator.setDuration(COLOR_ANIMATION_DURATION);
         animator.addUpdateListener(new DotColorUpdater(dot, this));
-        return animator;
-    }*/
 
-    /*private static class DotColorUpdater implements ValueAnimator.AnimatorUpdateListener {
-        private Dot mDot;
+        return animator;
+    }
+
+    private static class DotColorUpdater implements ValueAnimator.AnimatorUpdateListener {
+        private AnimatedDot mDot;
         private WeakReference<DotLoader> mDotLoaderRef;
 
-        private DotColorUpdater(Dot dot, DotLoader dotLoader) {
+        private DotColorUpdater(AnimatedDot dot, DotLoader dotLoader) {
             mDot = dot;
             mDotLoaderRef = new WeakReference<>(dotLoader);
         }
@@ -232,13 +255,13 @@ public class DotLoader extends View {
                 dotLoader.invalidateOnlyRectIfPossible();
             }
         }
-    }*/
+    }
 
     private static class DotYUpdater implements ValueAnimator.AnimatorUpdateListener {
-        private Dot mDot;
+        private AnimatedDot mDot;
         private WeakReference<DotLoader> mDotLoaderRef;
 
-        private DotYUpdater(Dot dot, DotLoader dotLoader) {
+        private DotYUpdater(AnimatedDot dot, DotLoader dotLoader) {
             mDot = dot;
             mDotLoaderRef = new WeakReference<>(dotLoader);
         }
@@ -246,6 +269,25 @@ public class DotLoader extends View {
         @Override
         public void onAnimationUpdate(ValueAnimator valueAnimator) {
             mDot.cy = (float) valueAnimator.getAnimatedValue();
+            DotLoader dotLoader = mDotLoaderRef.get();
+            if (dotLoader != null) {
+                dotLoader.invalidateOnlyRectIfPossible();
+            }
+        }
+    }
+
+    private static class DotRUpdater implements ValueAnimator.AnimatorUpdateListener {
+        private AnimatedDot mDot;
+        private WeakReference<DotLoader> mDotLoaderRef;
+
+        private DotRUpdater(AnimatedDot dot, DotLoader dotLoader) {
+            mDot = dot;
+            mDotLoaderRef = new WeakReference<>(dotLoader);
+        }
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+            mDot.setRadius((float) valueAnimator.getAnimatedValue());
             DotLoader dotLoader = mDotLoaderRef.get();
             if (dotLoader != null) {
                 dotLoader.invalidateOnlyRectIfPossible();
@@ -267,7 +309,7 @@ public class DotLoader extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.getClipBounds(mClipBounds);
-        for (Dot mDot : mDots) {
+        for (IDot mDot : mDots) {
             mDot.draw(canvas);
         }
     }
@@ -281,8 +323,10 @@ public class DotLoader extends View {
 
         int width;
         int height;
-        // desired height is 6 times the diameter of a dot.
-        int desiredHeight = (mDotRadius * 2 * 3) + getPaddingTop() + getPaddingBottom();
+        // desired height is 3 times the diameter of a dot.
+        float radius = mActiveRadius == 0 ? mDefRadius : mActiveRadius;
+
+        int desiredHeight = (int) ((radius * 3) + getPaddingTop() + getPaddingBottom());
 
         //Measure Height
         if (heightMode == MeasureSpec.EXACTLY) {
@@ -295,7 +339,7 @@ public class DotLoader extends View {
             //Be whatever you want
             height = desiredHeight;
         }
-        mCalculatedGapBetweenDotCenters = calculateGapBetweenDotCenters();
+        mCalculatedGapBetweenDotCenters = calculateGapBetweenDotCenters(radius);
         int desiredWidth = (int) (mCalculatedGapBetweenDotCenters * mDots.length);
         //Measure Width
         if (widthMode == MeasureSpec.EXACTLY) {
@@ -309,15 +353,53 @@ public class DotLoader extends View {
             width = desiredWidth;
         }
         for (int i = 0, size = mDots.length; i < size; i++) {
-            mDots[i].cx = (mDotRadius + i * mCalculatedGapBetweenDotCenters);
-            mDots[i].cy = height - mDotRadius;
+            mDots[i].cx = (radius + i * mCalculatedGapBetweenDotCenters);
+            mDots[i].cy = height - radius;
         }
-        mFromY = height - mDotRadius;
-        mToY = mDotRadius;
+        mFromY = height - radius;
+        mToY = radius;
         setMeasuredDimension(width, height);
     }
 
-    private float calculateGapBetweenDotCenters() {
-        return (mDotRadius * 2) + mDotRadius;
+    private float calculateGapBetweenDotCenters(float radius) {
+        return (radius * 2) + radius;
+    }
+
+    public int getNext(){
+        int pos = 0;
+        if(mActivePosDot < (dotsCount - 1)) {
+            pos = mActivePosDot;
+            return ++pos;
+        }
+        return pos;
+    }
+
+    public int getPrev(){
+        int prev = --mActivePosDot;
+        if(prev < 0) {
+            return (dotsCount - 1);
+        }
+        return prev;
+    }
+
+    public void changeDots(int position) {
+        int prev = getPrev();
+        for (int i = 0; i < dotsCount; i++) {
+            if(prev == i) {
+                setDefDot(i);
+            }
+        }
+
+        setActiveDot(position);
+        mActivePosDot = position;
+    }
+
+    private void setActiveDot(int pos){
+        mDots[pos] = new StaticDot(mActiveRadius, pos, mActiveColor);
+    }
+
+    private void setDefDot(int pos){
+        mDots[pos] = new AnimatedDot(mDefRadius, pos, mDefColors[0]);
+       /* ((AnimatedDot) mDots[pos]).startAnimation((mDots.length - 1) * APPEAR_DELAY_BETWEEN_DOTS);*/
     }
 }

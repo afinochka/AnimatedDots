@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="DotLoader">
-        <attr name="dot_radius" format="dimension" />
-        <attr name="color_array" format="reference" />
+        <attr name="dot_def_radius" format="dimension" />
+        <attr name="color_array_def" format="reference" />
+        <attr name="color_active" format="reference"/>
+        <attr name="dot_active_radius" format="dimension"/>
         <attr name="number_of_dots" format="integer" />
     </declare-styleable>
 </resources>

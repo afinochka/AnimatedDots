@@ -1,17 +1,17 @@
-package com.animation.app.animateddots.dots;
+package com.animation.app.animateddots.custom;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.animation.app.animateddots.dots.DotLoader;
+
 /**
- * Created by Dasha on 15.06.2017
+ * Created by Dasha on 16.06.2017
  */
 
-class Dot {
+class CDot {
     private Paint mPaint;
     int mCurrentColorIndex;
     private int mDotRadius;
@@ -19,18 +19,17 @@ class Dot {
     float cx;
     float cy;
     int position;
-    private AnimatorSet mAnimatorSet = new AnimatorSet();
-    private ValueAnimator mPositionAnimator;
-    private ValueAnimator mColorAnimator;
+    ValueAnimator positionAnimator;
+    ValueAnimator colorAnimator;
 
-    Dot(Integer[] colors, int dotRadius, int position) {
+    CDot(/*DotLoader parent, */int dotRadius, int position) {
         this.position = position;
-        mColors = colors;
+     /*   mColors = parent.mColors;*/
         mCurrentColorIndex = 0;
         mDotRadius = dotRadius;
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(mColors[mCurrentColorIndex]);
+      /*  mPaint.setColor(mColors[mCurrentColorIndex]);*/
         mPaint.setShadowLayer(5.5f, 6.0f, 6.0f, Color.BLACK);
         mPaint.setStyle(Paint.Style.FILL);
     }
@@ -51,27 +50,6 @@ class Dot {
     public int incrementAndGetColor() {
         incrementColorIndex();
         return getCurrentColor();
-    }
-
-    public void startAnimation(){
-        mAnimatorSet.playTogether(mPositionAnimator, mColorAnimator);
-        mAnimatorSet.start();
-    }
-
-    public void stopAnimation(){
-        mAnimatorSet.end();
-    }
-
-    void setPositionAnimator(ValueAnimator posAnimator){
-        mPositionAnimator = posAnimator;
-    }
-
-    void setColorAnimator(ValueAnimator colorAnimator){
-        mColorAnimator = colorAnimator;
-    }
-
-    public void setDelayPositionAnim(long delay){
-        mPositionAnimator.setStartDelay(delay);
     }
 
     void applyNextColor() {
