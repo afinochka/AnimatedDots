@@ -7,11 +7,11 @@ import android.animation.ValueAnimator;
  * Created by Dasha on 15.06.2017
  */
 
-class AnimationRepeater implements Animator.AnimatorListener {
+public class AnimationRepeater implements Animator.AnimatorListener {
     private AnimatedDot mDot;
     private int mDelay = 1000;
 
-    AnimationRepeater(AnimatedDot dot, int delay) {
+    public AnimationRepeater(AnimatedDot dot, int delay) {
         this.mDot = dot;
         mDelay = delay;
     }

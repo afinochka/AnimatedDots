@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dotLoader = (DotLoader) findViewById(R.id.dot_loader);
+    /*    dotLoader = (DotLoader) findViewById(R.id.dot_loader);
         btnRepeat = (Button) findViewById(R.id.btn_repeat);
         btnNext = (Button) findViewById(R.id.btn_move);
         btnRepeat.setOnClickListener(new View.OnClickListener() {
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dotLoader.changeDots(dotLoader.getNext());
             }
-        });
+        });*/
     }
 
     private static class DotIncrementRunnable implements Runnable {

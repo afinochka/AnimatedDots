@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="CustomScroll">
+        <attr name="dot_def_bg" format="reference" />
+        <attr name="dot_active_bg" format="reference" />
+        <attr name="count" format="integer" />
+        <attr name="padding_between_dots" format="integer"/>
+    </declare-styleable>
+
     <declare-styleable name="DotLoader">
         <attr name="dot_def_radius" format="dimension" />
         <attr name="color_array_def" format="reference" />
@@ -7,4 +14,5 @@
         <attr name="dot_active_radius" format="dimension"/>
         <attr name="number_of_dots" format="integer" />
     </declare-styleable>
+
 </resources>
