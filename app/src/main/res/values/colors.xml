@@ -5,8 +5,8 @@
     <color name="colorAccent">#FF4081</color>
 
     <array name="dot_colors">
-        <item>#00364e</item>
-        <item>#03a9f4</item>
+        <item name="active">#00364e</item>
+        <item name="default">#03a9f4</item>
     </array>
     <color name="active">#c10e0e</color>
 </resources>

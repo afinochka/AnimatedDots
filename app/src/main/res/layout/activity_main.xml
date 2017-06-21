@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:paddingTop="50dp"
                 tools:context=".MainActivity">
 
@@ -16,16 +16,10 @@
         app:color_array_def="@array/dot_colors"
         app:dot_def_radius="10dp"
         app:dot_active_radius="15dp"
-        app:number_of_dots="5"/>
+        app:number_of_dots="5"/>-->
 
-    <Button
-        android:id="@+id/btn_repeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/dot_loader"
-        android:text="repeat"/>
 
-    <Button
+    <!--<Button
         android:id="@+id/btn_move"
         android:layout_below="@+id/dot_loader"
         android:layout_toEndOf="@id/btn_repeat"
@@ -33,14 +27,38 @@
         android:layout_height="wrap_content"
         android:text="move to next"/>-->
 
-    <app:com.animation.app.animateddots.scroll.CustomScroll xmlns:android="http://schemas.android.com/apk/res/android"
-                                                            xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                            android:layout_width="match_parent"
-                                                            android:layout_height="match_parent"
-                                                            android:orientation="horizontal"
-                                                            app:dot_active_bg="@drawable/dot_active"
-                                                            app:dot_def_bg="@drawable/dot_def"
-                                                            app:count="5"
-                                                            app:padding_between_dots="45"/>
+    <LinearLayout
+        android:id="@+id/lyt_dots"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center"
+        android:orientation="horizontal"/>
+
+
+    <com.animation.app.animateddots.PagerIndicator
+        android:id="@+id/lyt_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_below="@id/lyt_dots"
+        app:dot_radius_def="20"
+        app:dot_radius_active="35"
+        app:dots_number="7"
+        app:dot_active_color="@color/active"
+        app:dot_def_colors="@array/dot_colors"/>
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lyt_indicator"
+        android:text="Next"/>
+
+    <Button
+        android:id="@+id/btn_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lyt_indicator"
+        android:layout_toEndOf="@id/btn_next"
+        android:text="Previous"/>
 
 </RelativeLayout>

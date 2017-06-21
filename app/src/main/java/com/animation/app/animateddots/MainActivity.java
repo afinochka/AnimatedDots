@@ -5,47 +5,41 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.animation.app.animateddots.dots.DotLoader;
-
 public class MainActivity extends AppCompatActivity {
 
-    DotLoader dotLoader;
-    Button btnRepeat;
+    private static final int DELAY_BETWEEN_DOTS = 500; //80
+    private static final int APPEAR_DELAY_BETWEEN_DOTS = 200; //80
+    private static final int BOUNCE_ANIMATION_DURATION = 500; //500
+    private static final int COLOR_ANIMATION_DURATION = 250; //80
+
     Button btnNext;
+    Button btnPrev;
+
+    PagerIndicator mPagerIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    /*    dotLoader = (DotLoader) findViewById(R.id.dot_loader);
-        btnRepeat = (Button) findViewById(R.id.btn_repeat);
-        btnNext = (Button) findViewById(R.id.btn_move);
-        btnRepeat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dotLoader.repeatAnimation();
-            }
-        });
+        btnNext = (Button) findViewById(R.id.btn_next);
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dotLoader.changeDots(dotLoader.getNext());
+                mPagerIndicator.getNext();
             }
-        });*/
+        });
+
+        btnPrev = (Button) findViewById(R.id.btn_prev);
+        btnPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPagerIndicator.getPrev();
+            }
+        });
+
+        mPagerIndicator = (PagerIndicator) findViewById(R.id.lyt_indicator);
+        mPagerIndicator.startAnimation();
     }
 
-    private static class DotIncrementRunnable implements Runnable {
-        private int mNumberOfDots;
-        private DotLoader mDotLoader;
 
-        private DotIncrementRunnable(int numberOfDots, DotLoader dotLoader) {
-            mNumberOfDots = numberOfDots;
-            mDotLoader = dotLoader;
-        }
-
-        @Override
-        public void run() {
-          /*  mDotLoader.setNumberOfDots(mNumberOfDots);*/
-        }
-    }
 }

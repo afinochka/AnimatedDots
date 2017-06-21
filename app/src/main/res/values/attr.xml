@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="CustomScroll">
-        <attr name="dot_def_bg" format="reference" />
-        <attr name="dot_active_bg" format="reference" />
-        <attr name="count" format="integer" />
+    <declare-styleable name="PagerIndicator">
+        <attr name="dot_radius_def" format="integer" />
+        <attr name="dot_radius_active" format="integer" />
+        <attr name="dots_number" format="integer" />
+        <attr name="dot_active_color" format="reference"/>
+        <attr name="dot_def_colors" format="reference"/>
         <attr name="padding_between_dots" format="integer"/>
-    </declare-styleable>
-
-    <declare-styleable name="DotLoader">
-        <attr name="dot_def_radius" format="dimension" />
-        <attr name="color_array_def" format="reference" />
-        <attr name="color_active" format="reference"/>
-        <attr name="dot_active_radius" format="dimension"/>
-        <attr name="number_of_dots" format="integer" />
     </declare-styleable>
 
 </resources>
