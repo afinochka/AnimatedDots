@@ -1,14 +1,10 @@
-package com.animation.app.animateddots;
+package com.animation.app.animateddots.Indicator;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
 /**
@@ -17,16 +13,18 @@ import android.util.AttributeSet;
 
 public class DotView extends android.support.v7.widget.AppCompatImageView {
 
-    enum DotType {
+    public enum DotType {
         ANIMATED,
         STATIC
     }
 
     AnimatorSet appearAnimation;
-    ValueAnimator colorAnimation;
     ObjectAnimator translateAnimation;
 
     private DotType mDotType = DotType.STATIC;
+
+    private int mColor = 0;
+    private float mRadius = 0;
 
     public DotView(Context context) {
         super(context);
@@ -36,29 +34,39 @@ public class DotView extends android.support.v7.widget.AppCompatImageView {
         super(context, attrs);
     }
 
-    void setDotImage(int radius, int color){
+    public void setDotImage(float radius, int color) {
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
-        shape.setSize(radius, radius);
+        shape.setSize((int) radius, (int) radius);
         shape.setColor(color);
 
+        mRadius = radius;
+        mColor = color;
         setImageDrawable(shape);
     }
 
-    void setDotType(DotType type){
+    public float getRaduis() {
+        return mRadius;
+    }
+
+    public void setDotType(DotType type) {
         mDotType = type;
         setScale(mDotType);
 
     }
 
-    private void setScale(DotType type){
+    private void setScale(DotType type) {
         float scale = 1f;
-        if(type == DotType.ANIMATED){
+        if (type == DotType.ANIMATED) {
             scale = 0f;
         }
 
         setScaleY(scale);
         setScaleX(scale);
+    }
+
+    public int getColor() {
+        return mColor;
     }
 
     public void setAppearAnimation(AnimatorSet appearAnimation) {
@@ -69,14 +77,6 @@ public class DotView extends android.support.v7.widget.AppCompatImageView {
         return appearAnimation;
     }
 
-    public void setColorAnimation(ValueAnimator colorAnimation) {
-        this.colorAnimation = colorAnimation;
-    }
-
-    public ValueAnimator getColorAnimation() {
-        return colorAnimation;
-    }
-
     public void setTranslateAnimation(ObjectAnimator translateAnimation) {
         this.translateAnimation = translateAnimation;
     }
@@ -85,7 +85,18 @@ public class DotView extends android.support.v7.widget.AppCompatImageView {
         return translateAnimation;
     }
 
-    public DotType getDotType(){
+    public DotType getDotType() {
         return mDotType;
+    }
+
+    @Override
+    public void clearAnimation() {
+        super.clearAnimation();
+        if (appearAnimation != null) {
+            appearAnimation.cancel();
+        }
+        if (translateAnimation != null) {
+            translateAnimation.cancel();
+        }
     }
 }

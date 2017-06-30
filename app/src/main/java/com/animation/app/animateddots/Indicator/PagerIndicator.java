@@ -1,22 +1,21 @@
-package com.animation.app.animateddots;
+package com.animation.app.animateddots.Indicator;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
+
+import com.animation.app.animateddots.Indicator.DotView;
+import com.animation.app.animateddots.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +26,10 @@ import java.util.List;
 
 public class PagerIndicator extends LinearLayout {
 
-    private static final int DELAY_BETWEEN_DOTS = 500; //80
-    private static final int APPEAR_DELAY_BETWEEN_DOTS = 200; //80
-    private static final int BOUNCE_ANIMATION_DURATION = 500; //500
-    private static final int COLOR_ANIMATION_DURATION = 250; //80
+    private static final int DELAY_BETWEEN_DOTS = 400;
+    private static final int APPEAR_ANIMATION_DELAY = 50;
+    private static final int LOADING_ANIMATION_DURATION = 400;
+    private static final int DEFAULT_COLOR_POSITION = 0;
 
     ArrayList<DotView> dots;
 
@@ -41,14 +40,14 @@ public class PagerIndicator extends LinearLayout {
     AnimatorSet mLoadingAnimationSet;
     AnimatorSet mGlobalSet;
 
-    private int mActiveRad = 30;
+    private float mActiveDiameter = 30;
     private int mActiveColor = 0;
     int mActivePos = 0;
 
-    private int mDefaultRad = 20;
+    private float mDefaultDiameter = 20;
     int[] mDefColors;
 
-    private int mDotsNumber = 1;
+    private float mPadding = 5;
 
 
     public PagerIndicator(Context context) {
@@ -72,17 +71,17 @@ public class PagerIndicator extends LinearLayout {
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PagerIndicator, 0, 0);
 
             try {
-                mDefaultRad = a.getInteger(R.styleable.PagerIndicator_dot_radius_def, mDefaultRad);
-                mActiveRad = a.getInteger(R.styleable.PagerIndicator_dot_radius_active, mActiveRad);
-                mDotsNumber = a.getInteger(R.styleable.PagerIndicator_dots_number, mDotsNumber);
+                mDefaultDiameter = a.getDimension(R.styleable.PagerIndicator_dot_diameter_def, mDefaultDiameter);
+                mActiveDiameter = a.getDimension(R.styleable.PagerIndicator_dot_diameter_active, mActiveDiameter);
+                mPadding = a.getDimension(R.styleable.PagerIndicator_distance_dot_centers, mPadding);
 
                 int colorId = a.getResourceId(R.styleable.PagerIndicator_dot_active_color, 0);
-                if(colorId != 0){
+                if (colorId != 0) {
                     mActiveColor = ContextCompat.getColor(getContext(), colorId);
                 }
 
                 int colorsArrayId = a.getResourceId(R.styleable.PagerIndicator_dot_def_colors, 0);
-                if(colorsArrayId != 0){
+                if (colorsArrayId != 0) {
                     mDefColors = getResources().getIntArray(colorsArrayId);
                 }
             } finally {
@@ -90,29 +89,25 @@ public class PagerIndicator extends LinearLayout {
             }
         }
 
-
-        initDots();
-        initAnimation();
     }
 
-    void initDots() {
+    public void initDots(int count) {
         dots = new ArrayList<>();
-        setGravity(Gravity.CENTER_VERTICAL);
         setOrientation(LinearLayout.HORIZONTAL);
 
-        if(mDotsNumber > 1 && mDefColors == null){
+        if (count > 1 && mDefColors == null) {
             throw new IllegalArgumentException("Colors for dots must not be empty");
         }
 
-        for (int i = 0; i < mDotsNumber; i++) {
+        for (int i = 0; i < count; i++) {
 
             DotView img = new DotView(getContext());
 
             if (i == mActivePos) {
-                img.setDotImage(mActiveRad, mActiveColor);
+                img.setDotImage(mActiveDiameter, mActiveColor);
                 img.setDotType(DotView.DotType.STATIC);
             } else {
-                img.setDotImage(mDefaultRad, mDefColors[0]);
+                img.setDotImage(mDefaultDiameter, mDefColors[DEFAULT_COLOR_POSITION]);
                 img.setDotType(DotView.DotType.ANIMATED);
             }
 
@@ -120,12 +115,17 @@ public class PagerIndicator extends LinearLayout {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
 
-            int rightMargin = i == 0 ? 25 : 32;
-            params.setMargins(0, 0, rightMargin, 0);
+            int rightLeftMargin = (int) (mPadding / 2);
+            if (img.getDotType() == DotView.DotType.STATIC) {
+                rightLeftMargin = rightLeftMargin - (int) Math.abs((mActiveDiameter - mDefaultDiameter) / 2);
+            }
+            params.setMargins(rightLeftMargin, 0, rightLeftMargin, 0);
 
             dots.add(img);
             addView(img, params);
         }
+
+        initAnimation();
     }
 
     void initAnimation() {
@@ -134,30 +134,26 @@ public class PagerIndicator extends LinearLayout {
             if (dot.getDotType() == DotView.DotType.ANIMATED) {
 
                 AnimatorSet set = createAppearAnimatorForDot(dot);
+                set.setStartDelay((index - 1) * APPEAR_ANIMATION_DELAY);
                 dot.setAppearAnimation(set);
                 appearAnim.add(set);
 
                 ObjectAnimator animatorLoad = createLoaderAnimatorForDot(dot);
-                animatorLoad.setStartDelay((index - 1) * 500);
+                animatorLoad.setStartDelay((index - 1) * DELAY_BETWEEN_DOTS);
                 dot.setTranslateAnimation(animatorLoad);
                 loadingAnim.add(animatorLoad);
-
-                ValueAnimator animatorColor = createColorAnimator(dot);
-                animatorColor.setStartDelay((index - 1) * 500);
-                dot.setColorAnimation(animatorColor);
-                loadingAnim.add(animatorColor);
             }
         }
     }
 
     private ObjectAnimator createLoaderAnimatorForDot(final DotView dot) {
-        final ObjectAnimator animator = ObjectAnimator.ofFloat(dot, TRANSLATION_Y, 0f, -15f);
+        final ObjectAnimator animator = ObjectAnimator.ofFloat(dot, TRANSLATION_Y, 0f, -mDefaultDiameter / 2);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
-        animator.setDuration(500);
+        animator.setDuration(LOADING_ANIMATION_DURATION);
         animator.setRepeatCount(1);
         animator.setRepeatMode(ObjectAnimator.REVERSE);
 
-       /* animator.addListener(new Animator.AnimatorListener() {
+        animator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -165,7 +161,7 @@ public class PagerIndicator extends LinearLayout {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                dot.setDotImage(mDefaultRad, (int) animation.getAnimatedValue());
+                dot.setDotImage(mDefaultDiameter, incColor(dot));
             }
 
             @Override
@@ -177,41 +173,46 @@ public class PagerIndicator extends LinearLayout {
             public void onAnimationRepeat(Animator animation) {
 
             }
-        });*/
+        });
         return animator;
+    }
+
+    public int incColor(DotView dot) {
+        int pos = 0;
+        if (mDefColors != null && mDefColors.length > 0) {
+            for (int i = 0; i < mDefColors.length; i++) {
+                if (mDefColors[i] == dot.getColor()) {
+                    pos = i;
+                }
+            }
+
+            pos++;
+            if (pos >= mDefColors.length) {
+                return mDefColors[0];
+            }
+            return mDefColors[pos];
+        }
+        return 0;
     }
 
     private AnimatorSet createAppearAnimatorForDot(final View dot) {
         AnimatorSet set = new AnimatorSet();
-        set.setInterpolator(new AccelerateInterpolator());
-        set.setDuration(500);
+        set.setInterpolator(new DecelerateInterpolator());
+        set.setDuration(APPEAR_ANIMATION_DELAY * dots.size());
         set.playTogether(ObjectAnimator.ofFloat(dot, SCALE_X, 0f, 1f),
                 ObjectAnimator.ofFloat(dot, SCALE_Y, 0f, 1f));
         return set;
     }
 
-    private ValueAnimator createColorAnimator(final DotView dot) {
-        ValueAnimator animator = ValueAnimator.ofInt(mDefColors);
-        animator.setDuration(500);
-        animator.setInterpolator(new DecelerateInterpolator());
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                dot.setDotImage(mDefaultRad, (int) animation.getAnimatedValue());
-            }
-        });
-        return animator;
-    }
-
-    void startAnimation() {
+    public void startAnimation() {
         if (appearAnim.size() != 0 && loadingAnim.size() != 0) {
 
             mAppearAnimatorSet = new AnimatorSet();
-            mAppearAnimatorSet.playSequentially(appearAnim);
+            mAppearAnimatorSet.playTogether(appearAnim);
 
             mLoadingAnimationSet = new AnimatorSet();
             mLoadingAnimationSet.playTogether(loadingAnim);
-            mLoadingAnimationSet.addListener(new AnimationRepeater(500));
+            mLoadingAnimationSet.addListener(new AnimationRepeater(LOADING_ANIMATION_DURATION));
 
             mGlobalSet = new AnimatorSet();
             mGlobalSet.playSequentially(mAppearAnimatorSet, mLoadingAnimationSet);
@@ -219,10 +220,23 @@ public class PagerIndicator extends LinearLayout {
         }
     }
 
-    public class AnimationRepeater implements Animator.AnimatorListener {
+    public void stopAnimation() {
+        mLoadingAnimationSet.removeAllListeners();
+        mAppearAnimatorSet.cancel();
+        mLoadingAnimationSet.cancel();
+        mGlobalSet.cancel();
+
+        for (DotView dot : dots) {
+            dot.clearAnimation();
+        }
+
+        resetDots();
+    }
+
+    private class AnimationRepeater implements Animator.AnimatorListener {
         private int mDelay = 500;
 
-        public AnimationRepeater(int delay) {
+        AnimationRepeater(int delay) {
             mDelay = delay;
         }
 
@@ -238,9 +252,9 @@ public class PagerIndicator extends LinearLayout {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    resetColorDots();
+                    resetDots();
                 }
-            }, 400);
+            }, mDelay - 100);
         }
 
         @Override
@@ -253,11 +267,14 @@ public class PagerIndicator extends LinearLayout {
         }
     }
 
-    void resetColorDots() {
+    void resetDots() {
         for (DotView dot : dots) {
-            int radius = dot.getDotType() == DotView.DotType.STATIC ? mActiveRad : mDefaultRad;
-            int color = dot.getDotType() == DotView.DotType.STATIC ? mActiveColor : mDefColors[0];
+            float radius = dot.getDotType() == DotView.DotType.STATIC ? mActiveDiameter : mDefaultDiameter;
+            int color = dot.getDotType() == DotView.DotType.STATIC ? mActiveColor : mDefColors[DEFAULT_COLOR_POSITION];
             dot.setDotImage(radius, color);
+            dot.setTranslationY(0);
+            dot.setScaleY(1);
+            dot.setScaleX(1);
         }
     }
 
@@ -267,6 +284,18 @@ public class PagerIndicator extends LinearLayout {
         ++mActivePos;
         if (mActivePos > (dots.size() - 1)) {
             mActivePos = 0;
+        }
+        addView(view, mActivePos);
+    }
+
+    public void changeDots(int position) {
+        View view = getChildAt(mActivePos);
+        removeView(view);
+        mActivePos = position;
+        if (mActivePos > (dots.size() - 1)) {
+            mActivePos = 0;
+        } else if (mActivePos < 0) {
+            mActivePos = dots.size() - 1;
         }
         addView(view, mActivePos);
     }

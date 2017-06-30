@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="PagerIndicator">
-        <attr name="dot_radius_def" format="integer" />
-        <attr name="dot_radius_active" format="integer" />
-        <attr name="dots_number" format="integer" />
+        <attr name="dot_diameter_def" format="dimension" />
+        <attr name="dot_diameter_active" format="dimension" />
         <attr name="dot_active_color" format="reference"/>
         <attr name="dot_def_colors" format="reference"/>
-        <attr name="padding_between_dots" format="integer"/>
+        <attr name="distance_dot_centers" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="RecyclerViewPager">
+        <attr name="rvp_triggerOffset" format="float" />
+        <attr name="rvp_flingFactor" format="float" />
+        <attr name="rvp_singlePageFling" format="boolean" />
+        <attr name="rvp_inertia" format="boolean"/>
+        <attr name="rvp_millisecondsPerInch" format="float" />
     </declare-styleable>
 
 </resources>

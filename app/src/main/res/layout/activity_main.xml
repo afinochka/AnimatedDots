@@ -1,64 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:paddingTop="50dp"
                 tools:context=".MainActivity">
-
-
-    <!--<com.animation.app.animateddots.dots.DotLoader
-        android:id="@+id/dot_loader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:color_active="@color/active"
-        app:color_array_def="@array/dot_colors"
-        app:dot_def_radius="10dp"
-        app:dot_active_radius="15dp"
-        app:number_of_dots="5"/>-->
-
-
-    <!--<Button
-        android:id="@+id/btn_move"
-        android:layout_below="@+id/dot_loader"
-        android:layout_toEndOf="@id/btn_repeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="move to next"/>-->
 
     <LinearLayout
         android:id="@+id/lyt_dots"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:gravity="center"
-        android:orientation="horizontal"/>
+        android:orientation="horizontal"
+        android:visibility="gone">
 
+        <TextView
+            android:id="@+id/txt_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Подождите"/>
 
-    <com.animation.app.animateddots.PagerIndicator
-        android:id="@+id/lyt_indicator"
+        <TextView
+            android:id="@+id/txt_dots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:textSize="30sp"/>
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_below="@id/lyt_dots"
-        app:dot_radius_def="20"
-        app:dot_radius_active="35"
-        app:dots_number="7"
-        app:dot_active_color="@color/active"
-        app:dot_def_colors="@array/dot_colors"/>
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:paddingBottom="42dp"
+        android:paddingEnd="30dp"
+        android:paddingStart="30dp"/>
 
-    <Button
-        android:id="@+id/btn_next"
+
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/lyt_indicator"
-        android:text="Next"/>
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
 
-    <Button
-        android:id="@+id/btn_prev"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/lyt_indicator"
-        android:layout_toEndOf="@id/btn_next"
-        android:text="Previous"/>
+        <com.animation.app.animateddots.Indicator.PagerIndicator
+            android:id="@+id/lyt_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:gravity="center"
+            app:distance_dot_centers="10.3dp"
+            app:dot_active_color="@color/active"
+            app:dot_def_colors="@array/dot_colors"
+            app:dot_diameter_active="12dp"
+            app:dot_diameter_def="8dp"/>
+
+        <!--<Button
+            android:id="@+id/btn_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lyt_indicator"
+            android:text="Start"/>
+
+        <Button
+            android:id="@+id/btn_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lyt_indicator"
+            android:layout_toEndOf="@id/btn_start"
+            android:text="stop"/>-->
+
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">AnimatedDots</string>
     <string name="action_settings">Settings</string>
+
+    <string-array name="loading">
+        <item>Подождите</item>
+        <item>Подождите.</item>
+        <item>Подождите..</item>
+        <item>Подождите...</item>
+    </string-array>
 </resources>
