@@ -39,6 +39,9 @@ public class MyPagerAdapter extends PagerAdapter {
         imageView.setImageResource(R.drawable.img);
         TextView text = (TextView) view.findViewById(R.id.txt_title);
         text.setText(mStrings.get(position) + position);
+
+
+
         collection.addView(view, 0);
         return view;
     }
