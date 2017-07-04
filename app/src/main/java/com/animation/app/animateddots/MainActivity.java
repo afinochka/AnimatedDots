@@ -4,18 +4,28 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.animation.app.animateddots.Indicator.PagerIndicator;
 import com.animation.app.animateddots.viewpager.MyPageTransformer;
 import com.animation.app.animateddots.viewpager.MyPagerAdapter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,14 +35,13 @@ public class MainActivity extends AppCompatActivity {
     Button btnStop;
 
     TextView mTxtDots;
+    TextView mTxtLoading;
 
     PagerIndicator mPagerIndicator;
 
     ViewPager mViewPager;
-    PagerAdapter pagerAdapter;
 
     String[] mStrings = new String[]{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"};
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +59,43 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        colorAnimation.setDuration(5000);
+        colorAnimation.start();
+
+
+        RelativeLayout constraintLayout = (RelativeLayout) findViewById(R.id.lyt_root);
+        AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
+        animationDrawable.setEnterFadeDuration(2000);
+        animationDrawable.setExitFadeDuration(4000);
+        animationDrawable.start();
+
+
+        initViewPager();
+        initPagerIndicator();
+
+        /*btnStart = (Button) findViewById(R.id.btn_start);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPagerIndicator.startAnimation();
+            }
+        });
+
+        btnStop = (Button) findViewById(R.id.btn_stop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPagerIndicator.stopAnimation();
+            }
+        });*/
+
+    }
+
+    void initViewPager() {
         mViewPager = (ViewPager) findViewById(R.id.vp);
-        pagerAdapter = new MyPagerAdapter(this, Arrays.asList(mStrings));
-        mViewPager.setAdapter(pagerAdapter);
+        MyPagerAdapter myPagerAdapter = new MyPagerAdapter(this);
+
+        mViewPager.setAdapter(myPagerAdapter);
         mViewPager.setPageTransformer(true, new MyPageTransformer(this));
         mViewPager.setClipToPadding(false);
         mViewPager.setPageMargin(40);   //56
@@ -84,30 +127,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        myPagerAdapter.setStrings(Arrays.asList(mStrings));
+    }
 
-        colorAnimation.setDuration(5000);
-        colorAnimation.start();
-
-        /*btnStart = (Button) findViewById(R.id.btn_start);
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPagerIndicator.startAnimation();
-            }
-        });
-
-        btnStop = (Button) findViewById(R.id.btn_stop);
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPagerIndicator.stopAnimation();
-            }
-        });*/
-
+    void initPagerIndicator() {
         mPagerIndicator = (PagerIndicator) findViewById(R.id.lyt_indicator);
         mPagerIndicator.initDots(mStrings.length);
         mPagerIndicator.startAnimation();
-
     }
-
 }
